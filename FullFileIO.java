@@ -2,6 +2,7 @@
 import java.awt.*;
 import hsa.Console;
 
+/** @author Vincent Macri and Kevin Shen
 public class FullFileIO
 {
     static Console c;           // The output console
