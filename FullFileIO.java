@@ -147,6 +147,15 @@ public class FullFileIO
     	askData();
     }
     
+	private String addExtension(String s){
+		String extension = s.substring(s.length()-5, s.length());
+		if(!extension.equals(".ksvm")){
+			return s + ".ksvm";
+		}
+		return s;
+	}
+	
+	
 	
 	/** @author Vincent Macri
 	 * 	
@@ -158,14 +167,20 @@ public class FullFileIO
         BufferedReader input;
  		
         c.println ("Enter the name of the file you want to open:");
-        fileName = c.readLine ();
+        fileName = addExtension(c.readLine ());
+        
+        
+        
         try
         {
             input = new BufferedReader (new FileReader (fileName));
             line = input.readLine ();
+        }catch(FileNotFoundException e){
+        	 JOptionPane.showMessageDialog (null, "That file does not exist!", "Error", JOptionPane.ERROR_MESSAGE);
         }
-        catch (IOException e)
+        catch (IOException f)
         {
+        	JOptionPane.showMessageDialog (null, "Error reading file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
 	}
 	
