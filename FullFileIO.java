@@ -10,12 +10,20 @@ import hsa.Console;
 */
 public class FullFileIO
 {
-    Console c;           // The output console
+    private Console c;           // The output console
 
+	private int number;
+	
     public static void main (String[] args)
     {
 	FullFileIO f = new FullFileIO ();
     }
+	
+	public void askData(){
+		title();
+		
+		
+	}
 
 
     /** @author Vincent Macri
