@@ -11,6 +11,7 @@ import hsa.Console;
 public class FullFileIO
 {
     private Console c;           // The output console
+    char choice;
 
 	private int number;
 	
@@ -33,5 +34,19 @@ public class FullFileIO
     public FullFileIO ()
     {
 	c = new Console ("Full File IO");
+    }
+
+
+    public void mainMenu ()
+    {
+	title ();
+    }
+
+
+    private void title ()
+    {
+	c.clear ();
+	c.print ("", 22);
+	c.println ("Full File IO - Vincent M. & Kevin S.");
     }
 } /* FullFileIO class */
