@@ -10,6 +10,17 @@ import javax.swing.JOptionPane;
 
     Explanation of instance variables:
 
+        Name        Type        Purpose
+        c           Console     The output Console.
+        choice      char        What option the user picked on the main menu.
+        number      int         The value stored.
+        header      String      The header for the .ksvm files.
+        isFileOpen  boolean     If a file is open.
+        valueStored boolean     If a number is stored.
+        fileName    String      The name of the open file.
+
+
+
 */
 public class FullFileIO
 {
@@ -17,8 +28,8 @@ public class FullFileIO
     private char choice;
     private int number;
     private String header = "camelCaseIsKISS";
-    private boolean isFileOpen = false;
-    private String fileName; 
+    private boolean isFileOpen = false, valueStored = false;
+    private String fileName;
 
     /** @author Vincent Macri
      *  @author Kevin Shen
@@ -69,69 +80,156 @@ public class FullFileIO
                     break mainLoop;
             }
         }
-
+        f.goodBye ();
     }
 
-	public void saveAs(){
-		
-	}
+
+    private void error (String error, int icon)
+    {
+        JOptionPane.showMessageDialog (null, error, "Error", icon);
+    }
+
+
+    public void save ()
+    {
+        PrintWriter output;
+
+        BufferedReader file;
+
+        if (!valueStored)
+        {
+            error ("There is nothing to save.", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        try
+        {
+            file = new BufferedReader (new FileReader (fileName));
+
+            //if yes - continue
+            //if no - call saveas
+            //if cancel return
+            int userChoice = yesNoCancelBox ("Would you like to overwrite the existing file?");
+
+            if (userChoice != 0)
+            {
+                if (userChoice == 1)
+                {
+                    saveAs ();
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+        }
+        catch (IOException e)
+        {
+
+        }
+
+        if (isFileOpen)
+        {
+
+            try
+            {
+                output = new PrintWriter (new FileWriter (fileName));
+                output.println (header);
+                output.println (number);
+                output.close ();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace ();
+            }
+        }
+        else
+        {
+
+            saveAs ();
+        }
+    }
+
+
+    public void saveAs ()
+    {
+        if (valueStored)
+        {
+            getValidFileName ("save");
+            save ();
+        }
+        else
+        {
+            error ("There is nothing for you to save.", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
 
     /**
      * @author Vincent Macri
+     * @author Kevin Shen
      * Clear the screen, display the number, then call pauseProgram.
      */
     public void display ()
     {
-        title ();
-        c.println ("The number stored in your file is: " + number);
-        pauseProgram ();
-    }
-
-
-    private void pauseProgram ()
-    {
-        c.setCursor (23, 1);
-
-        getChar ();
+        if (valueStored)
+        {
+            title ();
+            c.println ("The number stored in your file is: " + number);
+            pauseProgram ();
+        }
     }
 
 
     public void askData ()
     {
         title ();
+
         while (true)
         {
             try
             {
                 c.print ("Enter your number: ");
                 number = Integer.parseInt (c.readLine ());
+                valueStored = true;
                 break;
             }
             catch (NumberFormatException e)
             {
-                JOptionPane.showMessageDialog (null, "Please enter an integer.", "Error", JOptionPane.ERROR_MESSAGE);
+                error ("Please enter an integer.", JOptionPane.ERROR_MESSAGE);
+            }
+            if (!yesNoBox ("Would you like to enter a number instead of trying to crash me?"))
+            {
+                return;
             }
         }
     }
 
-	/**
-	 * @author Vincent Macri
-	 * 
-	 * If a file is open, call askData(). If no file is open, error.
-	 * 
-	 */
-	public void modify(){
-		if (isFileOpen){
-			askData();
-		}else{
-			JOptionPane.showMessageDialog (null, "You cannot modify a file when no file is open.", "Error", JOptionPane.WARNING_MESSAGE);
-		}
-	}
-	
-	
-	
+
+    /**
+     * @author Vincent Macri
+     * @author Kevin Shen
+     * If a file is open, call askData(). If no file is open, error.
+     *
+     */
+    public void modify ()
+    {
+        if (isFileOpen)
+        {
+            askData ();
+        }
+        else
+        {
+            error ("You cannot modify a file when no file is open.", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+
+
     /**
      *  @author Vincent Macri
+     * @author Kevin Shen
      *  Pause the program until a key is pressed.
      */
     private void pauseProgram ()
@@ -146,7 +244,7 @@ public class FullFileIO
     {
         title ();
         c.println ("Thanks for using this program!");
-        c.println ("By: Kevin Shen and Vincent Macri");
+        c.println ("By: Vincent Macri and Kevin Shen");
         pauseProgram ();
         c.close ();
     }
@@ -189,9 +287,17 @@ public class FullFileIO
     }
 
 
+    private void clearLine (int line)
+    {
+        c.setCursor (1, line);
+        c.println ();
+        c.setCursor (1, line);
+    }
+
+
     /** @author Vincent Macri
      *
-     *      Clear the screen and write the program title to the screen.
+     *  Clear the screen and write the program title to the screen.
      *
      */
     private void title ()
@@ -201,45 +307,64 @@ public class FullFileIO
         c.println ("Full File IO");
         c.println ();
     }
-	
-	//TODO: Trap for file name smaller than 4 characters.
+
+
+    //TODO: Trap for file name smaller than 4 characters.
     private String addExtension (String s)
     {
-        String extension = s.substring (s.length () - 5, s.length ());
-        if (!extension.equals (".ksvm"))
+        if (s.length () > 5 && s.substring (s.length () - 5, s.length ()).equals (".ksvm"))
         {
-            return s + ".ksvm";
+            return s;
         }
-        return s;
+        return s + ".ksvm";
     }
 
-	/**
-	 * @author Vincent Macri
-	 * 
-	 * Return true if the file name is valid, false if its not.
-	 * 
-	 */
+
+    private boolean yesNoBox (String text)
+    {
+        return (JOptionPane.showConfirmDialog (null, text, "Pick one.", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0);
+    }
+
+
+    private int yesNoCancelBox (String text)
+    {
+        return JOptionPane.showConfirmDialog ((Component) null, text, "What would you like to do?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+    }
+
+
+    /**
+     * @author Vincent Macri
+     *
+     * Return true if the file name is valid, false if its not.
+     *
+     */
     private boolean isFileNameValid (String file)
     {
-        return !(file.contains ("\\") || file.contains ("/") || file.contains ("?") || file.contains (":") || file.contains ("*")
-                || file.contains ("\"") || file.contains ("<") || file.contains (">") || file.contains ("|") || (file.length() <= 0));
+        return !((file.indexOf ("\\") + file.indexOf ("/") + file.indexOf ("?") + file.indexOf (":") + file.indexOf ("*")
+                    + file.indexOf ("\"") + file.indexOf ("<") + file.indexOf (">") + file.indexOf ("|") != -9) || (file.length () <= 0));
     }
 
-	private void getValidFileName (String operation){
-		title ();
-		c.println ("Enter the name of the file to want to " + operation + ":");
-		while (true) {
-			fileName = addExtension (c.readLine ());
-			
-			if (isFileNameValid(fileName)){
-				break;
-			}
-			JOptionPane.showMessageDialog (null, "Invalid file name.", "Error", JOptionPane.WARNING_MESSAGE);
-        }
-		fileName = addExtension(fileName);
-	}
 
-	//TODO: Cancel option.
+
+    private void getValidFileName (String operation)
+    {
+        title ();
+        c.println ("Enter the name of the file to want to " + operation + ":");
+        while (true)
+        {
+            fileName = c.readLine ();
+
+            if (isFileNameValid (fileName))
+            {
+                break;
+            }
+            error ("Invalid file name.", JOptionPane.WARNING_MESSAGE);
+        }
+        fileName = addExtension (fileName);
+    }
+
+
+    //TODO: Cancel option.
     /** @author Vincent Macri
      *  @author Kevin Shen
      *
@@ -251,54 +376,44 @@ public class FullFileIO
         title ();
         String inputStr;
         BufferedReader input;
-        
-        getValidFileName("open");
-                
-		try
+
+
+        while (true)
         {
-        	input = new BufferedReader (new FileReader (fileName));
-            break;
-        }
-		catch (FileNotFoundException e)
-        {
-                    JOptionPane.showMessageDialog (null, "That file does not exist!", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                catch (IOException f)
-                {
-                    JOptionPane.showMessageDialog (null, "Error reading file.", "Error", JOptionPane.ERROR_MESSAGE);
-                    f.printStackTrace ();
-                }
-            
-           
-        
-        try
-        { //Check for header.
-            inputStr = input.readLine ();
-            if (fileHeader.equals (header))
+            getValidFileName ("open");
+            try
             {
-                JOptionPane.showMessageDialog (null, "This file could not be opened. It may be corrupt.", "Error", JOptionPane.WARNING_MESSAGE);
+                input = new BufferedReader (new FileReader (fileName));
+                inputStr = input.readLine (); //Read header.
+                if (inputStr.equals (header)) //Check header.
+                {
+                    number = Integer.parseInt (input.readLine ());
+                    isFileOpen = true;
+                    valueStored = true;
+                    break;
+                }
+
+                error ("This file could not be opened. It may be corrupt.", JOptionPane.WARNING_MESSAGE);
+            }
+            catch (FileNotFoundException e)
+            {
+                error ("That file does not exist!", JOptionPane.ERROR_MESSAGE);
+            }
+            catch (NumberFormatException f)
+            {
+                error ("This file does not contain a valid integer. It may be corrupt.", JOptionPane.ERROR_MESSAGE);
+            }
+            catch (IOException g)
+            {
+                error ("Error reading file.", JOptionPane.ERROR_MESSAGE);
+                g.printStackTrace ();
+            }
+            if (yesNoBox ("Would you like to open a different file?"))
+            {
+                return;
             }
         }
-        catch (IOException e)
-        {
-            JOptionPane.showMessageDialog (null, "This file could not be opened. It may be corrupt.", "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace ();
-        }
 
-        try
-        {
-            number = Integer.parseInt (input.readLine ());
-        }
-        catch (NumberFormatException e)
-        {
-            JOptionPane.showMessageDialog (null, "This file does not contain a valid integer. It may be corrupt.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        catch (IOException f)
-        {
-            JOptionPane.showMessageDialog (null, "Something went wrong when reading the file, which may, or may not, be your fault.", "Error", JOptionPane.ERROR_MESSAGE);
-            f.printStackTrace ();
-        }
-		isFileOpen = true;
     }
 
 
