@@ -27,7 +27,7 @@ public class FullFileIO
     private Console c;
     private char choice;
     private int number;
-    private String header = "camelCaseIsKISS";
+    private String header = "camelCaseIsKISS snake_case_makes_me_feel_dirty PascalCaseLooksReallyStupidReallyReallyStupid";
     private boolean isFileOpen = false, valueStored = false;
     private String fileName;
 
@@ -188,6 +188,7 @@ public class FullFileIO
 
         while (true)
         {
+        	clearLine(5);
             try
             {
                 c.print ("Enter your number: ");
@@ -289,9 +290,9 @@ public class FullFileIO
 
     private void clearLine (int line)
     {
-        c.setCursor (1, line);
+        c.setCursor (line, 1);
         c.println ();
-        c.setCursor (1, line);
+        c.setCursor (line, 1);
     }
 
 
@@ -345,13 +346,14 @@ public class FullFileIO
     }
 
 
-
+    //TODO: Y/N/C
     private void getValidFileName (String operation)
     {
         title ();
         c.println ("Enter the name of the file to want to " + operation + ":");
         while (true)
         {
+        	clearLine(5);
             fileName = c.readLine ();
 
             if (isFileNameValid (fileName))
@@ -360,6 +362,7 @@ public class FullFileIO
             }
             error ("Invalid file name.", JOptionPane.WARNING_MESSAGE);
         }
+        isFileOpen = true;
         fileName = addExtension (fileName);
     }
 
@@ -397,7 +400,7 @@ public class FullFileIO
             }
             catch (FileNotFoundException e)
             {
-                error ("That file does not exist!", JOptionPane.ERROR_MESSAGE);
+                error ("That file does not exist, or is not the right file type.", JOptionPane.ERROR_MESSAGE);
             }
             catch (NumberFormatException f)
             {
@@ -408,7 +411,7 @@ public class FullFileIO
                 error ("Error reading file.", JOptionPane.ERROR_MESSAGE);
                 g.printStackTrace ();
             }
-            if (yesNoBox ("Would you like to open a different file?"))
+            if (!yesNoBox ("Would you like to open a different file?"))
             {
                 return;
             }
@@ -419,3 +422,5 @@ public class FullFileIO
 
 
 } /* FullFileIO class */
+
+
