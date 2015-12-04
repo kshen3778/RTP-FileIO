@@ -3,25 +3,25 @@ import java.awt.*;
 import hsa.Console;
 import java.io.*;
 import javax.swing.JOptionPane;
+
 /** @author Vincent Macri
-    @author Kevin Shen
+        @author Kevin Shen
 
-    This program demonstrates full file IO. The user can store a number.
+        This program demonstrates full file IO. The user can store a number.
 
-    Explanation of instance variables:
+        Explanation of instance variables:
 
-        Name        Type        Purpose
-        c           Console     The output Console.
-        choice      char        What option the user picked on the main menu.
-        number      int         The value stored.
-        header      String      The header for the .ksvm files.
-        isFileOpen  boolean     If a file is open.
-        valueStored boolean     If a number is stored.
-        fileName    String      The name of the open file.
-
-
+                Name            Type            Purpose
+                c                  Console       The output Console.
+                choice    char          What option the user picked on the main menu.
+                number    int            The value stored.
+                header    String          The header for the .ksvm files.
+                isFileOpen  boolean      If a file is open.
+                valueStored boolean      If a number is stored.
+                fileName        String    The name of the open file.
 
 */
+
 public class FullFileIO
 {
     private Console c;
@@ -38,8 +38,8 @@ public class FullFileIO
      *
      *   Explanation of local variables:
      *
-     *       Name    Type        Purpose
-     *       f       FullFileIO  Reference variable for an instance of the FullFileIO class.
+     *         Name Type            Purpose
+     *         f       FullFileIO  Reference variable for an instance of the FullFileIO class.
      */
     public static void main (String[] args)
     {
@@ -57,7 +57,6 @@ public class FullFileIO
 
                 case '2':
                     f.openFile ();
-                    f.display ();
                     break;
 
                 case '3':
@@ -84,6 +83,10 @@ public class FullFileIO
     }
 
 
+    /** Display a JOptionPane popup error.
+     * @param error The error message.
+     * @param icon The error icon.
+     */
     private void error (String error, int icon)
     {
         JOptionPane.showMessageDialog (null, error, "Error", icon);
@@ -93,21 +96,27 @@ public class FullFileIO
     public void save ()
     {
         PrintWriter output;
-
         BufferedReader file;
 
+        if (!isFileOpen)
+        {
+            saveAs ();
+        }
+
+        //If there is nothing to save
         if (!valueStored)
         {
             error ("There is nothing to save.", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
+        //if the user chooses Save
         try
         {
             file = new BufferedReader (new FileReader (fileName));
 
-            //if yes - continue
-            //if no - call saveas
+            //if yes - continues and saves
+            //if no - call saveas which creates a new file
             //if cancel return
             int userChoice = yesNoCancelBox ("Would you like to overwrite the existing file?");
 
@@ -126,29 +135,22 @@ public class FullFileIO
         }
         catch (IOException e)
         {
-
+            e.printStackTrace ();
         }
 
-        if (isFileOpen)
+        try
         {
-
-            try
-            {
-                output = new PrintWriter (new FileWriter (fileName));
-                output.println (header);
-                output.println (number);
-                output.close ();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace ();
-            }
+            output = new PrintWriter (new FileWriter (fileName));
+            output.println (header);
+            output.println (number);
+            output.close ();
         }
-        else
+        catch (IOException e)
         {
-
-            saveAs ();
+            e.printStackTrace ();
         }
+
+
     }
 
 
@@ -188,7 +190,7 @@ public class FullFileIO
 
         while (true)
         {
-        	clearLine(5);
+            clearLine (4);
             try
             {
                 c.print ("Enter your number: ");
@@ -200,6 +202,7 @@ public class FullFileIO
             {
                 error ("Please enter an integer.", JOptionPane.ERROR_MESSAGE);
             }
+
             if (!yesNoBox ("Would you like to enter a number instead of trying to crash me?"))
             {
                 return;
@@ -252,8 +255,8 @@ public class FullFileIO
 
 
     /** @author Vincent Macri
-            Creates a new instance of the FullFileIO class.
-            Creates a new Console with a window name.
+                    Creates a new instance of the FullFileIO class.
+                    Creates a new Console with a window name.
     */
     public FullFileIO ()
     {
@@ -267,7 +270,7 @@ public class FullFileIO
      *
      * Explanation of structures:
      *
-     *      Do while loop - Ask the user what they want to do until the input is valid. Ask at least once.
+     *        Do while loop - Ask the user what they want to do until the input is valid. Ask at least once.
      *
      */
     public void mainMenu ()
@@ -296,11 +299,7 @@ public class FullFileIO
     }
 
 
-    /** @author Vincent Macri
-     *
-     *  Clear the screen and write the program title to the screen.
-     *
-     */
+    /** Clear the screen and write the program title to the screen. */
     private void title ()
     {
         c.clear ();
@@ -321,6 +320,7 @@ public class FullFileIO
     }
 
 
+    /** Return true if they click yes, false if they click no. */
     private boolean yesNoBox (String text)
     {
         return (JOptionPane.showConfirmDialog (null, text, "Pick one.", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == 0);
@@ -346,32 +346,45 @@ public class FullFileIO
     }
 
 
-    //TODO: Y/N/C
-    private void getValidFileName (String operation)
+    /**
+     * @param operation What the user wants to do with the file.
+     *
+     * @return True if they picked a file, false if they didn't.'
+     *
+     */
+    private boolean getValidFileName (String operation)
     {
         title ();
         c.println ("Enter the name of the file to want to " + operation + ":");
         while (true)
         {
-        	clearLine(5);
+            clearLine (4);
             fileName = c.readLine ();
 
             if (isFileNameValid (fileName))
             {
                 break;
             }
+
             error ("Invalid file name.", JOptionPane.WARNING_MESSAGE);
+
+            if (!yesNoBox ("Do you want to enter another file name?"))
+            {
+                return false;
+            }
         }
+
         isFileOpen = true;
         fileName = addExtension (fileName);
+
+        return true;
     }
 
 
-    //TODO: Cancel option.
     /** @author Vincent Macri
      *  @author Kevin Shen
      *
-     *      Open the file the user asks for. Store its value in number.
+     *        Open the file the user asks for. Store its value in number.
      *
      */
     public void openFile ()
@@ -383,7 +396,10 @@ public class FullFileIO
 
         while (true)
         {
-            getValidFileName ("open");
+            if (!getValidFileName ("open"))
+            {
+                return;
+            }
             try
             {
                 input = new BufferedReader (new FileReader (fileName));
@@ -416,11 +432,8 @@ public class FullFileIO
                 return;
             }
         }
-
+        f.display ();
     }
-
-
-
 } /* FullFileIO class */
 
 
