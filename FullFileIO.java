@@ -134,10 +134,6 @@ public class FullFileIO
                     }
                     return;
                 }
-                else
-                {
-                    overwriting = false;
-                }
 
             }
             catch (IOException e)
@@ -152,17 +148,19 @@ public class FullFileIO
             output.println (header);
             output.println (number);
             output.close ();
+            savedChanges = true;
+            overwriting = false;
         }
         catch (IOException e)
         {
-            e.printStackTrace ();
         }
-        savedChanges = true;
+
     }
 
 
     public void saveAs ()
     {
+        title ();
         if (valueStored)
         {
             if (!getValidFileName ("save"))
@@ -185,6 +183,7 @@ public class FullFileIO
      */
     public void display ()
     {
+        title ();
         if (valueStored)
         {
             title ();
@@ -196,6 +195,7 @@ public class FullFileIO
 
     public void newValue ()
     {
+        title ();
         if (!saveExisting ())
         {
             askData ();
@@ -239,6 +239,7 @@ public class FullFileIO
      */
     public void modify ()
     {
+        title ();
         if (isFileOpen)
         {
             askData ();
@@ -435,7 +436,7 @@ public class FullFileIO
         String inputStr;
         BufferedReader input;
 
-        if (saveExisting)
+        if (saveExisting ())
         {
             return;
         }
@@ -471,7 +472,6 @@ public class FullFileIO
             catch (IOException g)
             {
                 error ("Error reading file.", JOptionPane.ERROR_MESSAGE);
-                g.printStackTrace ();
             }
             if (!yesNoBox ("Would you like to open a different file?"))
             {
