@@ -83,7 +83,10 @@ public class FullFileIO
 		    break;
 
 		default:
-		    break mainLoop;
+		    if (f.saveExisting ())
+		    {
+			break mainLoop;
+		    }
 	    }
 	}
 	f.goodBye ();
@@ -157,7 +160,7 @@ public class FullFileIO
 	}
 	catch (IOException e)
 	{
-		error("Unknown Error", JOptionPane.WARNING_MESSAGE);
+	    error ("Unknown Error", JOptionPane.WARNING_MESSAGE);
 	}
 
     }
@@ -214,14 +217,14 @@ public class FullFileIO
 
 	while (true)
 	{
-	    clearLine (6);
+	    clearLine (5);
 	    try
 	    {
 		c.print ("Enter your number: ");
 		number = Integer.parseInt (c.readLine ());
 		valueStored = true;
 		savedChanges = false;
-		break;
+		return;
 	    }
 	    catch (NumberFormatException e)
 	    {
@@ -245,9 +248,12 @@ public class FullFileIO
     public void modify ()
     {
 	title ();
-	if (isFileOpen)
+	if (valueStored)
 	{
-	    askData ();
+	    if (!saveExisting ())
+	    {
+		askData ();
+	    }
 	}
 	else
 	{
@@ -273,6 +279,7 @@ public class FullFileIO
     public void goodBye ()
     {
 	title ();
+
 	c.println ("Thanks for using this program!");
 	c.println ("By: Vincent Macri and Kevin Shen");
 	pauseProgram ();
@@ -332,9 +339,10 @@ public class FullFileIO
 	c.print ("", 34);
 	c.println ("Full File IO");
 	c.println ();
-	if(fileName != null){
-		c.println("Current File Open: " + fileName);
-		c.println();
+	if (fileName != null)
+	{
+	    c.println ("Current File Open: " + fileName);
+	    c.println ();
 	}
     }
 
@@ -342,7 +350,7 @@ public class FullFileIO
     //TODO: Trap for file name smaller than 4 characters.
     private String addExtension (String s)
     {
-	if (s.length () > 5 && s.endsWith(".ksvm"))
+	if (s.length () > 5 && s.endsWith (".ksvm"))
 	{
 	    return s;
 	}
@@ -388,7 +396,7 @@ public class FullFileIO
 	c.println ("Enter the name of the file to " + operation + ":");
 	while (true)
 	{
-	    clearLine (6);
+	    clearLine (5);
 	    fileName = c.readLine ();
 
 	    if (isFileNameValid (fileName))
@@ -465,6 +473,7 @@ public class FullFileIO
 		    number = Integer.parseInt (input.readLine ());
 		    isFileOpen = true;
 		    valueStored = true;
+		    savedChanges = true;
 		    break;
 		}
 
@@ -490,3 +499,6 @@ public class FullFileIO
 	display ();
     }
 } /* FullFileIO class */
+
+
+
