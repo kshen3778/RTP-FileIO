@@ -12,13 +12,15 @@ import javax.swing.JOptionPane;
         Explanation of instance variables:
 
                 Name            Type            Purpose
-                c                  Console       The output Console.
-                choice    char          What option the user picked on the main menu.
-                number    int            The value stored.
-                header    String          The header for the .ksvm files.
-                isFileOpen  boolean      If a file is open.
-                valueStored boolean      If a number is stored.
-                fileName        String    The name of the open file.
+                c               Console         The output Console.
+                choice          char            What option the user picked on the main menu.
+                number          int             The value stored.
+                header          String          The header for the .ksvm files.
+                isFileOpen      boolean         If a file is open.
+                valueStored     boolean         If a number is stored.
+                fileName        String          The name of the open file.
+                savedChanges    boolean         If the changes were saved.
+                overwriting     boolean         If the user has already decided to overwrite the file.
 
 */
 
@@ -28,7 +30,7 @@ public class FullFileIO
     private char choice;
     private int number;
     private String header = "camelCaseIsKISS snake_case_makes_me_feel_dirty PascalCaseLooksReallyStupidReallyReallyStupid";
-    private boolean isFileOpen = false, valueStored = false;
+    private boolean isFileOpen = false, valueStored = false, savedChanges = true, overwriting = true;
     private String fileName;
 
     /** @author Vincent Macri
@@ -52,7 +54,7 @@ public class FullFileIO
             {
 
                 case '1':
-                    f.askData ();
+                    f.newValue ();
                     break;
 
                 case '2':
@@ -98,11 +100,6 @@ public class FullFileIO
         PrintWriter output;
         BufferedReader file;
 
-        if (!isFileOpen)
-        {
-            saveAs ();
-        }
-
         //If there is nothing to save
         if (!valueStored)
         {
@@ -110,32 +107,43 @@ public class FullFileIO
             return;
         }
 
-        //if the user chooses Save
-        try
+        if (!isFileOpen)
         {
-            file = new BufferedReader (new FileReader (fileName));
+            saveAs ();
+            return;
+        }
 
-            //if yes - continues and saves
-            //if no - call saveas which creates a new file
-            //if cancel return
-            int userChoice = yesNoCancelBox ("Would you like to overwrite the existing file?");
-
-            if (userChoice != 0)
+        //Check if we are overwriting the file.
+        if (overwriting)
+        {
+            try
             {
-                if (userChoice == 1)
+
+                file = new BufferedReader (new FileReader (fileName));
+
+                //if yes - continues and saves
+                //if no - call saveas which creates a new file
+                //if cancel return
+                int userChoice = yesNoCancelBox ("Would you like to overwrite the existing file?");
+
+                if (userChoice != 0)
                 {
-                    saveAs ();
+                    if (userChoice == 1)
+                    {
+                        saveAs ();
+                    }
+                    return;
                 }
                 else
                 {
-                    return;
+                    overwriting = false;
                 }
-            }
 
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace ();
+            }
+            catch (IOException e)
+            {
+
+            }
         }
 
         try
@@ -149,8 +157,7 @@ public class FullFileIO
         {
             e.printStackTrace ();
         }
-
-
+        savedChanges = true;
     }
 
 
@@ -158,7 +165,10 @@ public class FullFileIO
     {
         if (valueStored)
         {
-            getValidFileName ("save");
+            if (!getValidFileName ("save"))
+            {
+                return;
+            }
             save ();
         }
         else
@@ -184,6 +194,15 @@ public class FullFileIO
     }
 
 
+    public void newValue ()
+    {
+        if (!saveExisting ())
+        {
+            askData ();
+        }
+    }
+
+
     public void askData ()
     {
         title ();
@@ -196,6 +215,7 @@ public class FullFileIO
                 c.print ("Enter your number: ");
                 number = Integer.parseInt (c.readLine ());
                 valueStored = true;
+                savedChanges = false;
                 break;
             }
             catch (NumberFormatException e)
@@ -355,7 +375,7 @@ public class FullFileIO
     private boolean getValidFileName (String operation)
     {
         title ();
-        c.println ("Enter the name of the file to want to " + operation + ":");
+        c.println ("Enter the name of the file to " + operation + ":");
         while (true)
         {
             clearLine (4);
@@ -376,8 +396,30 @@ public class FullFileIO
 
         isFileOpen = true;
         fileName = addExtension (fileName);
-
+        overwriting = true;
         return true;
+    }
+
+
+    /** Return true if they want to cancel. */
+    private boolean saveExisting ()
+    {
+        if (!savedChanges)
+        {
+            int option = yesNoCancelBox ("Do you want to save your existing file?");
+            if (option != 1)
+            { //If they chose to save or cancel.
+                if (option == 0)
+                { //Save.
+                    save ();
+                }
+                else
+                { //Return.
+                    return (true);
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -393,6 +435,10 @@ public class FullFileIO
         String inputStr;
         BufferedReader input;
 
+        if (saveExisting)
+        {
+            return;
+        }
 
         while (true)
         {
@@ -432,8 +478,6 @@ public class FullFileIO
                 return;
             }
         }
-        f.display ();
+        display ();
     }
 } /* FullFileIO class */
-
-
