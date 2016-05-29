@@ -1,6 +1,6 @@
 /*
 Kevin Shen, Vincent Macri
-Decembrt 7, 2015
+December 7, 2015
 Ms Dyke, ICS3U
 Full File IO Program that stores a single integer.
 */
